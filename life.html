@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Particle Simulation with Slider & Mouse Controls</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background: #eee;
+    }
+    body {
+      display: flex;
+    }
+    /* Sidebar on the left */
+    #sidebar {
+      width: 300px;
+      background-color: #f9f9f9;
+      padding: 10px;
+      overflow-y: auto;
+      border-right: 1px solid #ccc;
+    }
+    /* Canvas container fills the rest of the space */
+    #canvasContainer {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Make canvas fill the container */
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background-color: black;
+    }
+    .group-section {
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      padding: 10px;
+      background: #fff;
+    }
+    .group-section h3 {
+      margin: 0 0 10px 0;
+      font-size: 16px;
+      background: #ddd;
+      padding: 5px;
+    }
+    label {
+      display: block;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+    input[type="range"] {
+      width: 100%;
+    }
+    output {
+      float: right;
+      font-weight: bold;
+    }
+    button {
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      font-size: 14px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <!-- Sidebar with controls -->
+  <div id="sidebar">
+    <button id="startResetBtn">START/RESET</button>
+    <label>
+      <input type="checkbox" id="bounded" checked> Bounded
+    </label>
+    <hr>
+    <!-- GREEN group controls -->
+    <div class="group-section" id="group-green">
+      <h3>GREEN</h3>
+      <label>
+        Number: 
+        <input type="range" id="num_green" min="0" max="500" value="0" oninput="document.getElementById('num_green_output').value = this.value">
+        <output id="num_green_output">0</output>
+      </label>
+      <label>
+        green x green: 
+        <input type="range" id="force_green_green" min="-200" max="200" value="0" oninput="document.getElementById('force_green_green_output').value = this.value">
+        <output id="force_green_green_output">0</output>
+      </label>
+      <label>
+        green x red: 
+        <input type="range" id="force_green_red" min="-200" max="200" value="0" oninput="document.getElementById('force_green_red_output').value = this.value">
+        <output id="force_green_red_output">0</output>
+      </label>
+      <label>
+        green x white: 
+        <input type="range" id="force_green_white" min="-200" max="200" value="0" oninput="document.getElementById('force_green_white_output').value = this.value">
+        <output id="force_green_white_output">0</output>
+      </label>
+      <label>
+        green x blue: 
+        <input type="range" id="force_green_blue" min="-200" max="200" value="0" oninput="document.getElementById('force_green_blue_output').value = this.value">
+        <output id="force_green_blue_output">0</output>
+      </label>
+      <label>
+        radius g x g: 
+        <input type="range" id="radius_green_green" min="0" max="200" value="0" oninput="document.getElementById('radius_green_green_output').value = this.value">
+        <output id="radius_green_green_output">0</output>
+      </label>
+      <label>
+        radius g x red: 
+        <input type="range" id="radius_green_red" min="0" max="200" value="0" oninput="document.getElementById('radius_green_red_output').value = this.value">
+        <output id="radius_green_red_output">0</output>
+      </label>
+      <label>
+        radius g x white: 
+        <input type="range" id="radius_green_white" min="0" max="200" value="0" oninput="document.getElementById('radius_green_white_output').value = this.value">
+        <output id="radius_green_white_output">0</output>
+      </label>
+      <label>
+        radius g x blue: 
+        <input type="range" id="radius_green_blue" min="0" max="200" value="0" oninput="document.getElementById('radius_green_blue_output').value = this.value">
+        <output id="radius_green_blue_output">0</output>
+      </label>
+    </div>
+    <!-- RED group controls -->
+    <div class="group-section" id="group-red">
+      <h3>RED</h3>
+      <label>
+        Number: 
+        <input type="range" id="num_red" min="0" max="500" value="0" oninput="document.getElementById('num_red_output').value = this.value">
+        <output id="num_red_output">0</output>
+      </label>
+      <label>
+        red x red: 
+        <input type="range" id="force_red_red" min="-200" max="200" value="0" oninput="document.getElementById('force_red_red_output').value = this.value">
+        <output id="force_red_red_output">0</output>
+      </label>
+      <label>
+        red x green: 
+        <input type="range" id="force_red_green" min="-200" max="200" value="0" oninput="document.getElementById('force_red_green_output').value = this.value">
+        <output id="force_red_green_output">0</output>
+      </label>
+      <label>
+        red x white: 
+        <input type="range" id="force_red_white" min="-200" max="200" value="0" oninput="document.getElementById('force_red_white_output').value = this.value">
+        <output id="force_red_white_output">0</output>
+      </label>
+      <label>
+        red x blue: 
+        <input type="range" id="force_red_blue" min="-200" max="200" value="0" oninput="document.getElementById('force_red_blue_output').value = this.value">
+        <output id="force_red_blue_output">0</output>
+      </label>
+      <label>
+        radius r x red: 
+        <input type="range" id="radius_red_red" min="0" max="200" value="0" oninput="document.getElementById('radius_red_red_output').value = this.value">
+        <output id="radius_red_red_output">0</output>
+      </label>
+      <label>
+        radius r x green: 
+        <input type="range" id="radius_red_green" min="0" max="200" value="0" oninput="document.getElementById('radius_red_green_output').value = this.value">
+        <output id="radius_red_green_output">0</output>
+      </label>
+      <label>
+        radius r x white: 
+        <input type="range" id="radius_red_white" min="0" max="200" value="0" oninput="document.getElementById('radius_red_white_output').value = this.value">
+        <output id="radius_red_white_output">0</output>
+      </label>
+      <label>
+        radius r x blue: 
+        <input type="range" id="radius_red_blue" min="0" max="200" value="0" oninput="document.getElementById('radius_red_blue_output').value = this.value">
+        <output id="radius_red_blue_output">0</output>
+      </label>
+    </div>
+    <!-- WHITE group controls -->
+    <div class="group-section" id="group-white">
+      <h3>WHITE</h3>
+      <label>
+        Number: 
+        <input type="range" id="num_white" min="0" max="500" value="0" oninput="document.getElementById('num_white_output').value = this.value">
+        <output id="num_white_output">0</output>
+      </label>
+      <label>
+        white x white: 
+        <input type="range" id="force_white_white" min="-200" max="200" value="0" oninput="document.getElementById('force_white_white_output').value = this.value">
+        <output id="force_white_white_output">0</output>
+      </label>
+      <label>
+        white x red: 
+        <input type="range" id="force_white_red" min="-200" max="200" value="0" oninput="document.getElementById('force_white_red_output').value = this.value">
+        <output id="force_white_red_output">0</output>
+      </label>
+      <label>
+        white x green: 
+        <input type="range" id="force_white_green" min="-200" max="200" value="0" oninput="document.getElementById('force_white_green_output').value = this.value">
+        <output id="force_white_green_output">0</output>
+      </label>
+      <label>
+        white x blue: 
+        <input type="range" id="force_white_blue" min="-200" max="200" value="0" oninput="document.getElementById('force_white_blue_output').value = this.value">
+        <output id="force_white_blue_output">0</output>
+      </label>
+      <label>
+        radius w x white: 
+        <input type="range" id="radius_white_white" min="0" max="200" value="0" oninput="document.getElementById('radius_white_white_output').value = this.value">
+        <output id="radius_white_white_output">0</output>
+      </label>
+      <label>
+        radius w x red: 
+        <input type="range" id="radius_white_red" min="0" max="200" value="0" oninput="document.getElementById('radius_white_red_output').value = this.value">
+        <output id="radius_white_red_output">0</output>
+      </label>
+      <label>
+        radius w x green: 
+        <input type="range" id="radius_white_green" min="0" max="200" value="0" oninput="document.getElementById('radius_white_green_output').value = this.value">
+        <output id="radius_white_green_output">0</output>
+      </label>
+      <label>
+        radius w x blue: 
+        <input type="range" id="radius_white_blue" min="0" max="200" value="0" oninput="document.getElementById('radius_white_blue_output').value = this.value">
+        <output id="radius_white_blue_output">0</output>
+      </label>
+    </div>
+    <!-- BLUE group controls -->
+    <div class="group-section" id="group-blue">
+      <h3>BLUE</h3>
+      <label>
+        Number: 
+        <input type="range" id="num_blue" min="0" max="500" value="0" oninput="document.getElementById('num_blue_output').value = this.value">
+        <output id="num_blue_output">0</output>
+      </label>
+      <label>
+        blue x blue: 
+        <input type="range" id="force_blue_blue" min="-200" max="200" value="0" oninput="document.getElementById('force_blue_blue_output').value = this.value">
+        <output id="force_blue_blue_output">0</output>
+      </label>
+      <label>
+        blue x white: 
+        <input type="range" id="force_blue_white" min="-200" max="200" value="0" oninput="document.getElementById('force_blue_white_output').value = this.value">
+        <output id="force_blue_white_output">0</output>
+      </label>
+      <label>
+        blue x red: 
+        <input type="range" id="force_blue_red" min="-200" max="200" value="0" oninput="document.getElementById('force_blue_red_output').value = this.value">
+        <output id="force_blue_red_output">0</output>
+      </label>
+      <label>
+        blue x green: 
+        <input type="range" id="force_blue_green" min="-200" max="200" value="0" oninput="document.getElementById('force_blue_green_output').value = this.value">
+        <output id="force_blue_green_output">0</output>
+      </label>
+      <label>
+        radius b x blue: 
+        <input type="range" id="radius_blue_blue" min="0" max="200" value="0" oninput="document.getElementById('radius_blue_blue_output').value = this.value">
+        <output id="radius_blue_blue_output">0</output>
+      </label>
+      <label>
+        radius b x white: 
+        <input type="range" id="radius_blue_white" min="0" max="200" value="0" oninput="document.getElementById('radius_blue_white_output').value = this.value">
+        <output id="radius_blue_white_output">0</output>
+      </label>
+      <label>
+        radius b x red: 
+        <input type="range" id="radius_blue_red" min="0" max="200" value="0" oninput="document.getElementById('radius_blue_red_output').value = this.value">
+        <output id="radius_blue_red_output">0</output>
+      </label>
+      <label>
+        radius b x green: 
+        <input type="range" id="radius_blue_green" min="0" max="200" value="0" oninput="document.getElementById('radius_blue_green_output').value = this.value">
+        <output id="radius_blue_green_output">0</output>
+      </label>
+    </div>
+  </div>
+
+  <!-- Canvas for the simulation -->
+  <div id="canvasContainer">
+    <canvas id="life"></canvas>
+  </div>
+
+  <script>
+    // Reset controls to their default values on page load
+    window.addEventListener("load", () => {
+      // Reset all range sliders to their default values
+      const sliders = document.querySelectorAll('#sidebar input[type="range"]');
+      sliders.forEach(slider => {
+        slider.value = slider.defaultValue;
+        const output = document.getElementById(slider.id + '_output');
+        if (output) output.value = slider.defaultValue;
+      });
+      // Reset the checkbox to its default state
+      const boundedCheckbox = document.getElementById("bounded");
+      boundedCheckbox.checked = boundedCheckbox.defaultChecked;
+    });
+
+    // Get canvas and context; make canvas fill its container.
+    const canvas = document.getElementById("life");
+    const ctx = canvas.getContext("2d");
+    let width, height;
+
+    function resizeCanvas() {
+      const container = document.getElementById("canvasContainer");
+      canvas.width = container.clientWidth;
+      canvas.height = container.clientHeight;
+      width = canvas.width;
+      height = canvas.height;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    // Global simulation variables
+    let particles = {}; // Object holding arrays for each group
+    let animationFrameId;
+    let simParams = getParams(); // Initial parameters
+
+    // Mouse dragging variables
+    let dragging = false;
+    let mouseX = 0, mouseY = 0;
+    
+    // Update mouse coordinates relative to canvas
+    function updateMousePosition(e) {
+      const rect = canvas.getBoundingClientRect();
+      mouseX = e.clientX - rect.left;
+      mouseY = e.clientY - rect.top;
+    }
+    
+    // Mouse event listeners for canvas
+    canvas.addEventListener("mousedown", function(e) {
+      dragging = true;
+      updateMousePosition(e);
+    });
+    canvas.addEventListener("mousemove", function(e) {
+      if (dragging) {
+        updateMousePosition(e);
+      }
+    });
+    canvas.addEventListener("mouseup", function(e) {
+      dragging = false;
+    });
+    canvas.addEventListener("mouseleave", function(e) {
+      dragging = false;
+    });
+
+    // Utility: generate random position (50px margin)
+    function randomPos() {
+      return Math.random() * (width - 100) + 50;
+    }
+
+    // Particle constructor
+    function createParticle(x, y, color) {
+      return { x: x, y: y, vx: 0, vy: 0, color: color };
+    }
+
+    // Create an array of particles for one group
+    function createGroup(num, color) {
+      const group = [];
+      for (let i = 0; i < num; i++) {
+        group.push(createParticle(randomPos(), randomPos(), color));
+      }
+      return group;
+    }
+
+    // Colors for each group
+    const groupColors = {
+      green: "lime",
+      red: "red",
+      white: "white",
+      blue: "blue"
+    };
+
+    // Read simulation parameters from the sliders
+    function getParams() {
+      return {
+        bounded: document.getElementById("bounded").checked,
+        groups: {
+          green: {
+            number: Number(document.getElementById("num_green").value),
+            interactions: {
+              green: { 
+                force: Number(document.getElementById("force_green_green").value), 
+                radius: Number(document.getElementById("radius_green_green").value) 
+              },
+              red: { 
+                force: Number(document.getElementById("force_green_red").value), 
+                radius: Number(document.getElementById("radius_green_red").value) 
+              },
+              white: { 
+                force: Number(document.getElementById("force_green_white").value), 
+                radius: Number(document.getElementById("radius_green_white").value) 
+              },
+              blue: { 
+                force: Number(document.getElementById("force_green_blue").value), 
+                radius: Number(document.getElementById("radius_green_blue").value) 
+              }
+            }
+          },
+          red: {
+            number: Number(document.getElementById("num_red").value),
+            interactions: {
+              red: { 
+                force: Number(document.getElementById("force_red_red").value), 
+                radius: Number(document.getElementById("radius_red_red").value) 
+              },
+              green: { 
+                force: Number(document.getElementById("force_red_green").value), 
+                radius: Number(document.getElementById("radius_red_green").value) 
+              },
+              white: { 
+                force: Number(document.getElementById("force_red_white").value), 
+                radius: Number(document.getElementById("radius_red_white").value) 
+              },
+              blue: { 
+                force: Number(document.getElementById("force_red_blue").value), 
+                radius: Number(document.getElementById("radius_red_blue").value) 
+              }
+            }
+          },
+          white: {
+            number: Number(document.getElementById("num_white").value),
+            interactions: {
+              white: { 
+                force: Number(document.getElementById("force_white_white").value), 
+                radius: Number(document.getElementById("radius_white_white").value) 
+              },
+              red: { 
+                force: Number(document.getElementById("force_white_red").value), 
+                radius: Number(document.getElementById("radius_white_red").value) 
+              },
+              green: { 
+                force: Number(document.getElementById("force_white_green").value), 
+                radius: Number(document.getElementById("radius_white_green").value) 
+              },
+              blue: { 
+                force: Number(document.getElementById("force_white_blue").value), 
+                radius: Number(document.getElementById("radius_white_blue").value) 
+              }
+            }
+          },
+          blue: {
+            number: Number(document.getElementById("num_blue").value),
+            interactions: {
+              blue: { 
+                force: Number(document.getElementById("force_blue_blue").value), 
+                radius: Number(document.getElementById("radius_blue_blue").value) 
+              },
+              white: { 
+                force: Number(document.getElementById("force_blue_white").value), 
+                radius: Number(document.getElementById("radius_blue_white").value) 
+              },
+              red: { 
+                force: Number(document.getElementById("force_blue_red").value), 
+                radius: Number(document.getElementById("radius_blue_red").value) 
+              },
+              green: { 
+                force: Number(document.getElementById("force_blue_green").value), 
+                radius: Number(document.getElementById("radius_blue_green").value) 
+              }
+            }
+          }
+        }
+      };
+    }
+
+    // Initialize particle groups based on current parameters
+    function initParticles() {
+      const params = simParams.groups;
+      particles = {};
+      for (let group in params) {
+        particles[group] = createGroup(params[group].number, groupColors[group]);
+      }
+    }
+
+    // Draw all particles on the canvas
+    function drawParticles() {
+      ctx.clearRect(0, 0, width, height);
+      for (let group in particles) {
+        for (let p of particles[group]) {
+          ctx.fillStyle = p.color;
+          ctx.fillRect(p.x, p.y, 3, 3);
+        }
+      }
+    }
+
+    // Apply interaction between two groups
+    function applyInteraction(groupA, groupB, force, radius) {
+      let particlesA = particles[groupA];
+      let particlesB = particles[groupB];
+      for (let i = 0; i < particlesA.length; i++) {
+        let a = particlesA[i];
+        let fx = 0, fy = 0;
+        for (let j = 0; j < particlesB.length; j++) {
+          let b = particlesB[j];
+          let dx = a.x - b.x;
+          let dy = a.y - b.y;
+          let d = Math.sqrt(dx * dx + dy * dy);
+          if (d > 0 && d < radius) {
+            let F = force / (d * d);
+            fx += F * dx;
+            fy += F * dy;
+          }
+        }
+        a.vx = (a.vx + fx) * 0.9;
+        a.vy = (a.vy + fy) * 0.9;
+      }
+    }
+
+    // Update particle positions and handle boundaries or wrapping
+    function updatePositions() {
+      const bounded = simParams.bounded;
+      for (let group in particles) {
+        for (let p of particles[group]) {
+          p.x += p.vx;
+          p.y += p.vy;
+          if (bounded) {
+            if (p.x <= 0 || p.x >= width) { p.vx *= -0.9; }
+            if (p.y <= 0 || p.y >= height) { p.vy *= -0.9; }
+          } else {
+            if (p.x < 0) p.x = width;
+            if (p.x > width) p.x = 0;
+            if (p.y < 0) p.y = height;
+            if (p.y > height) p.y = 0;
+          }
+        }
+      }
+    }
+
+    // The main update loop: apply interactions, update positions, and draw
+    function update() {
+      // Refresh simulation parameters (in case any slider has been moved)
+      simParams = getParams();
+      for (let groupA in simParams.groups) {
+        let interactions = simParams.groups[groupA].interactions;
+        for (let groupB in interactions) {
+          let inter = interactions[groupB];
+          applyInteraction(groupA, groupB, inter.force, inter.radius);
+        }
+      }
+      
+      // If dragging, add an extra force to particles near the mouse pointer.
+      if (dragging) {
+        for (let group in particles) {
+          for (let p of particles[group]) {
+            let dx = mouseX - p.x;
+            let dy = mouseY - p.y;
+            let d = Math.sqrt(dx * dx + dy * dy);
+            if (d < 100) {  // Only affect particles within 100px of the cursor
+              let factor = 0.05;
+              p.vx += dx * factor;
+              p.vy += dy * factor;
+            }
+          }
+        }
+      }
+      
+      updatePositions();
+      drawParticles();
+      animationFrameId = requestAnimationFrame(update);
+    }
+
+    // START/RESET button handler
+    document.getElementById("startResetBtn").addEventListener("click", function () {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      simParams = getParams();
+      initParticles();
+      update();
+    });
+
+    // Start simulation on page load
+    initParticles();
+    update();
+  </script>
+</body>
+</html>
